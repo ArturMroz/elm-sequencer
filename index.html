@@ -8,15 +8,39 @@
   <title>Elm sequencer</title>
 
   <link rel="stylesheet" href="style.css">
+  <!-- <link rel="stylesheet" href="site.css"> -->
 </head>
 
 <body>
+  <h2>Ultimate super duper drum machine</h2>
   <div id="elm"></div>
   <script src="elm.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.1.1/howler.core.min.js"></script>
   <!-- <script src="elm.min.js"></script> -->
 
   <script>
     var app = Elm.Main.init({ node: document.getElementById('elm') });
+
+    const kick = new Howl({ src: ['https://raw.githubusercontent.com/bholtbholt/step-sequencer/master/samples/kck.mp3'] });
+    const snare = new Howl({ src: ['https://raw.githubusercontent.com/bholtbholt/step-sequencer/master/samples/snr.mp3'] });
+    const hat = new Howl({ src: ['https://raw.githubusercontent.com/bholtbholt/step-sequencer/master/samples/hat.mp3'] });
+
+    // const samples = {
+    //   kick: kick,
+    //   snare: snare,
+    //   hat: hat,
+    // };
+
+    const samples = {
+      kick,
+      snare,
+      hat,
+    };
+
+    app.ports.sendClips.subscribe(clips => {
+      clips.map(clip => samples[clip].play());
+    });
+
 
     // window.addEventListener('keydown', function (e) {
     //   if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {

@@ -1,29 +1,55 @@
 :root {
-  /* --step-light: #9aafc4; */
-  /* --step-dark: #677c91; */
 
-  --step-light: #E8DDCB;
-  --step-dark: #CDB380;
-  /* --step-active: #036564; */
+  /* --step-light: #9aafc4;
+  --step-dark: #677c91;
+  --step-active: #036564; */
+
+  /* --step-light: #E8DDCB;
+  --step-dark: #dbc080;
   --step-active: #99173c;
+  --bg-color: #2e2633; */
+
+  /* --step-light: #A8D46F;
+  --step-dark: #359668;
+  --step-active: #FFED90;
+  --bg-color: #3C3251; */
+
+  /* --step-light: #64908A;
+  --step-dark: rgb(68, 102, 98);
+  --step-active: #E8CAA4;
+  --bg-color: #3C3251; */
+
+  --step-light: #E5DDCB;
+  --step-dark: #A7C5BD;
+  --step-active: #CF4647;
+  --step-active: #EB7B59;
+  --bg-color: #524656;
+
+  /* --step-light: #E8DDCB;
+  --step-dark: #CDB380;
+  --step-active: #036564;
+  --bg-color: #031634; */
 
   /* --step-light: #efffcd;
   --step-dark: #bac898;
-
   --step-active: #99173c;
-  */
+ */
 
 }
 
 body {
   padding: 20px;
   font-family: Arial, Helvetica, sans-serif;
+  /* background: #2e2633; */
   /* background: #031634; */
-  background: #2e2633;
+  background: var(--bg-color);
 }
 
 .track {
   display: flex;
+  /* align-items: flex-end; */
+  /* align-content: flex-end; */
+  margin-bottom: 30px;
   height: 20px;
 }
 
@@ -36,20 +62,20 @@ body {
 
 }
 
-button {
-  padding: 10px 5px;
-  margin: 4px;
-}
+/* button {
+  padding: 5px 4px;
+  margin: 5px;
+} */
 
 .step {
   cursor: pointer;
-  padding: 20px;
+  padding: 18px;
   margin: 2px;
   background-color: var(--step-light);
   border: 1px solid transparent;
   border-bottom: 2px solid rgba(0, 0, 0, .3);
-  border-radius: 6px;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, .3)
+  border-radius: 5px;
+  /* box-shadow: 0 2px 3px rgba(0, 0, 0, .3) */
 }
 
 .step:hover {
@@ -63,6 +89,31 @@ button {
   background-color: var(--step-dark);
 }
 
-.step.active {
+.step._active {
   background-color: var(--step-active);
+  border-bottom-width: 1px;
+}
+
+
+ol {
+  counter-reset: item;
+  list-style-type: none;
+  color: white;
+}
+
+li {
+  display: inline;
+  padding: 5px;
+  /* border-radius: 50%; */
+  opacity: .2;
+}
+
+li._active {
+  /* background: crimson; */
+  opacity: .7;
+}
+
+li:before {
+  content: counter(item) "  ";
+  counter-increment: item
 }
