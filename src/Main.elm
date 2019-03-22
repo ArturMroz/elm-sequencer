@@ -2,9 +2,9 @@ port module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Array exposing (Array)
 import Browser
-import Html exposing (Html, button, div, input, li, ol, p, text)
-import Html.Attributes exposing (class, maxlength, type_, value)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, input, label, li, ol, p, text)
+import Html.Attributes exposing (class, classList, maxlength, type_, value)
+import Html.Events exposing (onClick, onInput)
 import Set exposing (Set)
 import Time exposing (..)
 
@@ -54,22 +54,107 @@ type Playback
     | Stopped
 
 
+hat : Clip
+hat =
+    "hat"
+
+
+kick : Clip
+kick =
+    "kick"
+
+
+snare : Clip
+snare =
+    "snare"
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { tracks = Array.fromList [ initTrack "hat", initTrack "snare", initTrack "kick" ]
-      , playback = Playing
+    ( { tracks = Array.fromList [ initTrack hat, initTrack snare, initTrack kick ]
+      , playback = Stopped
       , playbackPosition = 16
       , bpm = 100
       , playbackSequence = Array.initialize 16 (always Set.empty)
+
+      --   , playbackSequence = rockPreset
       }
     , Cmd.none
     )
 
 
+rockPreset : Array Track
+rockPreset =
+    [ { name = hat
+      , sequence = Array.initialize 16 (\n -> modBy 2 n == 0)
+      }
+    , { name = snare
+      , sequence = Array.initialize 16 (\n -> n == 4 || n == 12)
+      }
+    , { name = kick
+      , sequence = Array.initialize 16 (\n -> List.member n [ 0, 3, 6, 9, 10 ])
+      }
+    ]
+        |> Array.fromList
 
--- initSequence : Array Bool
--- initSequence =
---     Array.initialize 16 (always False)
+
+funkPreset : Array Track
+funkPreset =
+    [ { name = hat
+      , sequence = Array.initialize 16 (always True)
+      }
+    , { name = snare
+      , sequence = Array.initialize 16 (\n -> n == 4 || n == 12)
+      }
+    , { name = kick
+      , sequence = Array.initialize 16 (\n -> List.member n [ 0, 1, 6, 7 ])
+      }
+    ]
+        |> Array.fromList
+
+
+
+-- rockPreset : Array (Set Clip)
+-- rockPreset =
+--     [ Set.fromList [ hat, kick ]
+--     , Set.empty
+--     , Set.fromList [ hat ]
+--     , Set.empty
+--     , Set.fromList [ hat, snare ]
+--     , Set.empty
+--     , Set.fromList [ hat, kick ]
+--     , Set.empty
+--     , Set.fromList [ hat, kick ]
+--     , Set.empty
+--     , Set.fromList [ hat ]
+--     , Set.empty
+--     , Set.fromList [ hat, snare ]
+--     , Set.empty
+--     , Set.fromList [ hat ]
+--     , Set.empty
+--     ]
+--         |> Array.fromList
+-- funkPreset : Array (Set Clip)
+-- funkPreset =
+--     [ Set.fromList [ hat, kick ]
+--     , Set.fromList [ hat, kick ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat, snare ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat, kick ]
+--     , Set.fromList [ hat, kick ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat, snare ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat ]
+--     , Set.fromList [ hat ]
+--     ]
+--         |> Array.fromList
+-- |> Set.to
 
 
 initTrack : Clip -> Track
@@ -79,30 +164,14 @@ initTrack clip =
     }
 
 
-
--- initHat : Track
--- initHat =
---     { sequence = initSequence
---     , name = "hat"
---     }
--- initSnare : Track
--- initSnare =
---     { sequence = initSequence
---     , name = "snare"
---     }
--- initKick : Track
--- initKick =
---     { sequence = initSequence
---     , name = "kick"
---     }
--- UPDATE
-
-
 type Msg
     = ToggleStep Int Clip Int Bool
     | UpdatePlaybackPosition Time.Posix
+    | UpdateBPM String
     | StartPlayback
     | StopPlayback
+    | SetRockPreset
+    | SetFunkPreset
 
 
 setNestedArray : Int -> (a -> a) -> Array a -> Array a
@@ -111,8 +180,8 @@ setNestedArray index setFn array =
         Nothing ->
             array
 
-        Just a ->
-            Array.set index (setFn a) array
+        Just x ->
+            Array.set index (setFn x) array
 
 
 updateTrackStep : Int -> Int -> Array Track -> Array Track
@@ -121,10 +190,6 @@ updateTrackStep trackIndex stepIndex tracks =
         toggleStep step =
             not step
 
-        -- if step == Off then
-        --     On
-        -- else
-        --     Off
         newSequence track =
             setNestedArray stepIndex toggleStep track.sequence
 
@@ -132,6 +197,36 @@ updateTrackStep trackIndex stepIndex tracks =
             { track | sequence = newSequence track }
     in
     setNestedArray trackIndex newTrack tracks
+
+
+
+-- updatePlaybackFromPreset : Array Track -> Array (Set Clip) -> Array (Set Clip)
+
+
+updatePlaybackFromPreset : Model -> Array (Set Clip)
+updatePlaybackFromPreset { tracks, playbackSequence } =
+    let
+        rockPreset2 =
+            [ Set.fromList [ hat, kick ]
+            , Set.empty
+            , Set.fromList [ hat ]
+            , Set.empty
+            , Set.fromList [ hat, snare ]
+            , Set.empty
+            , Set.fromList [ hat, kick ]
+            , Set.empty
+            , Set.fromList [ hat, kick ]
+            , Set.empty
+            , Set.fromList [ hat ]
+            , Set.empty
+            , Set.fromList [ hat, snare ]
+            , Set.empty
+            , Set.fromList [ hat ]
+            , Set.empty
+            ]
+                |> Array.fromList
+    in
+    rockPreset2
 
 
 updatePlaybackSequence : Int -> Clip -> Array (Set Clip) -> Array (Set Clip)
@@ -176,6 +271,13 @@ update msg model =
             , sendClips (Set.toList stepClips)
             )
 
+        UpdateBPM bpm ->
+            let
+                bpm_ =
+                    Maybe.withDefault model.bpm (String.toInt bpm)
+            in
+            ( { model | bpm = bpm_ }, Cmd.none )
+
         StartPlayback ->
             ( { model | playback = Playing }, Cmd.none )
 
@@ -183,6 +285,25 @@ update msg model =
             ( { model
                 | playback = Stopped
                 , playbackPosition = 16
+              }
+            , Cmd.none
+            )
+
+        SetRockPreset ->
+            ( { model
+                | tracks = rockPreset
+
+                -- , playbackSequence = updatePlaybackSequence 2 hat model.playbackSequence
+                , playbackSequence = updatePlaybackFromPreset model
+                , bpm = 110
+              }
+            , Cmd.none
+            )
+
+        SetFunkPreset ->
+            ( { model
+                | tracks = funkPreset
+                , bpm = 90
               }
             , Cmd.none
             )
@@ -257,6 +378,7 @@ renderBPM model =
         , type_ "number"
         , Html.Attributes.min "60"
         , Html.Attributes.max "300"
+        , onInput UpdateBPM
         ]
         []
 
@@ -277,22 +399,36 @@ renderPlaybackButton model =
 
             else
                 "playback-button _stopped"
+
+        buttonText =
+            if model.playback == Stopped then
+                "Play"
+
+            else
+                "Stop"
     in
     button
         [ onClick togglePlayback
         , class buttonClasses
         ]
-        []
+        [ text buttonText ]
 
 
 renderControls : Model -> Html Msg
 renderControls model =
-    div []
-        [ p [] [ text (String.fromInt model.playbackPosition) ]
+    div
+        [ class "controls" ]
+        [ renderPlaybackButton model
+        , renderBPM model
+        , div [] []
+        , label [] [ text "presets" ]
+        , button [ onClick SetRockPreset ] [ text "Rock" ]
 
+        -- label [] [ text "BPM" ]
+        -- p [] [ text (String.fromInt model.playbackPosition) ]
         -- , button [ onClick StartPlayback ] []
         -- , button [ onClick StopPlayback ] []
-        , renderPlaybackButton model
+        -- , button [ onClick SetFunkPreset ] [ text "Funk" ]
         ]
 
 
@@ -300,38 +436,34 @@ renderTracks : Model -> Html Msg
 renderTracks model =
     div []
         (model.tracks
-            |> Array.indexedMap renderTrack
+            |> Array.indexedMap (renderTrack model.playbackPosition)
             |> Array.toList
         )
 
 
-renderTrack : Int -> Track -> Html Msg
-renderTrack index track =
+renderTrack : Int -> Int -> Track -> Html Msg
+renderTrack playbackPosition index track =
     div
         [ class "track" ]
         [ p [ class "track-title" ] [ text track.name ]
-        , div [ class "track-sequence" ] (renderSequence index track.name track.sequence)
+        , div [ class "track-sequence" ] (renderSequence playbackPosition index track.name track.sequence)
         ]
 
 
-renderSequence : Int -> Clip -> Array Bool -> List (Html Msg)
-renderSequence index clip sequence =
-    Array.indexedMap (renderStep index clip) sequence
+renderSequence : Int -> Int -> Clip -> Array Bool -> List (Html Msg)
+renderSequence playbackPosition index clip sequence =
+    Array.indexedMap (renderStep playbackPosition index clip) sequence
         |> Array.toList
 
 
-renderStep : Int -> Clip -> Int -> Bool -> Html Msg
-renderStep trackIndex clip stepIndex step =
-    let
-        classes =
-            if step then
-                "step _active"
-
-            else
-                "step"
-    in
+renderStep : Int -> Int -> Clip -> Int -> Bool -> Html Msg
+renderStep playbackPosition trackIndex clip stepIndex step =
     button
         [ onClick (ToggleStep trackIndex clip stepIndex step)
-        , class classes
+        , classList
+            [ ( "step", True )
+            , ( "_active", step )
+            , ( "_flashing", step && playbackPosition == stepIndex )
+            ]
         ]
         []
