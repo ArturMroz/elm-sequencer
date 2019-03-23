@@ -39,7 +39,8 @@
 }
 
 body {
-  color: var(--step-light);
+  /* color: var(--step-light); */
+  color: var(--step-dark);
   padding: 20px;
   font-family: Arial, Helvetica, sans-serif;
   background: var(--bg-color);
@@ -47,10 +48,12 @@ body {
 
 main {
   display: grid;
+  grid-template-columns: auto auto;
   place-content: center center;
 }
 
 h1 {
+  grid-column: 2;
   text-align: center;
   font-size: 50px;
   color: var(--step-light);
@@ -61,13 +64,16 @@ h1 {
 }
 
 .controls {
-  padding: 20px;
   display: grid;
   grid-auto-flow: column;
   gap: 10px;
-  margin-left: 60px;
-  margin-right: 0;
-  padding-right: 0;
+  grid-column: 2;
+
+  padding-top: 15px;
+  /* padding: 20px; */
+  /* margin-left: 60px; */
+  /* margin-right: 0; */
+  /* padding-right: 0; */
   /* padding: 20px; */
   /* margin: 20px; */
   /* grid-template-columns: 50px 200px 100px 1fr 90px 120px; */
@@ -79,7 +85,8 @@ h1 {
   border-radius: 5px;
   /* background-color: var(--step-dark); */
   background-color: transparent;
-  border: 2px solid var(--step-dark);
+  background-color: var(--dark);
+  /* border: 2px solid var(--step-dark); */
   /* color: var(--bg-color); */
   color: var(--step-dark);
   cursor: pointer;
@@ -117,7 +124,8 @@ h1 {
 }
 
 .track-title {
-  color: #fff;
+  /* color: #fff; */
+  /* color: var(--) */
   width: 70px;
   padding-right: 10px;
   text-align: right;
@@ -161,12 +169,16 @@ h1 {
   box-shadow: var(--step-active) 0 0 10px;
 }
 
-ol {
+
+ol.cursor {
+  grid-column: 2;
   counter-reset: item;
   list-style-type: none;
   color: white;
   display: flex;
-  margin-left: 40px;
+  margin: 10px 0;
+  padding: 0;
+  /* margin-left: 40px; */
   /* justify-content: space-evenly; */
   justify-content: flex-start;
 }

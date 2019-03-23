@@ -10,33 +10,29 @@
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css?family=Yesteryear" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.1.1/howler.core.min.js"></script>
+
   <script src="elm.js"></script>
   <!-- <script src="elm.min.js"></script> -->
-
 </head>
 
 <body>
-  <main>
+  <div id="elm"></div>
 
-    <h1>Timber drum machine</h1>
-    <div id="elm"></div>
+  <script>
+    var app = Elm.Main.init({ node: document.getElementById('elm') });
 
-    <script>
-      var app = Elm.Main.init({ node: document.getElementById('elm') });
+    const newHowl = name => new Howl({ src: [`/sfx/${name}.mp3`] });
 
-      const newHowl = name => new Howl({ src: [`/sfx/${name}.mp3`] });
+    const kick = newHowl('kick');
+    const snare = newHowl('snare');
+    const hat = newHowl('hat');
 
-      const kick = newHowl('kick');
-      const snare = newHowl('snare');
-      const hat = newHowl('hat');
+    const samples = { kick, snare, hat, };
 
-      const samples = { kick, snare, hat, };
-
-      app.ports.sendClips.subscribe(clips => {
-        clips.map(clip => samples[clip].play());
-      });
-    </script>
-  </main>
+    app.ports.sendClips.subscribe(clips => {
+      clips.map(clip => samples[clip].play());
+    });
+  </script>
 </body>
 
 </html>

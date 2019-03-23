@@ -2,7 +2,7 @@ port module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Array exposing (Array)
 import Browser
-import Html exposing (Html, button, div, input, label, li, ol, p, text)
+import Html exposing (Html, button, div, h1, input, label, li, main_, ol, p, text)
 import Html.Attributes exposing (class, classList, maxlength, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Set exposing (Set)
@@ -292,8 +292,6 @@ update msg model =
         SetRockPreset ->
             ( { model
                 | tracks = rockPreset
-
-                -- , playbackSequence = updatePlaybackSequence 2 hat model.playbackSequence
                 , playbackSequence = updatePlaybackFromPreset model
                 , bpm = 110
               }
@@ -342,24 +340,22 @@ bpmToMilliseconds bpm =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ renderCursor model
-        , renderTracks model
-        , renderControls model
-        ]
+    main_ []
+        ([ h1 [] [ text "Timber drum machine" ]
+         , renderCursor model
+         ]
+            ++ renderTracks model
+            ++ [ renderControls model ]
+        )
 
 
 renderCursorPoint : Model -> Int -> Set String -> Html Msg
 renderCursorPoint model index _ =
-    let
-        activeClass =
-            if model.playbackPosition == index && model.playback == Playing then
-                "_active"
-
-            else
-                ""
-    in
-    li [ class activeClass ] []
+    li
+        [ classList
+            [ ( "_active", model.playbackPosition == index && model.playback == Playing ) ]
+        ]
+        []
 
 
 renderCursor : Model -> Html Msg
@@ -432,22 +428,21 @@ renderControls model =
         ]
 
 
-renderTracks : Model -> Html Msg
+renderTracks : Model -> List (Html Msg)
 renderTracks model =
-    div []
-        (model.tracks
-            |> Array.indexedMap (renderTrack model.playbackPosition)
-            |> Array.toList
-        )
+    model.tracks
+        |> Array.indexedMap (renderTrack model.playbackPosition)
+        |> Array.toList
+        |> List.concat
 
 
-renderTrack : Int -> Int -> Track -> Html Msg
+renderTrack : Int -> Int -> Track -> List (Html Msg)
 renderTrack playbackPosition index track =
-    div
-        [ class "track" ]
-        [ p [ class "track-title" ] [ text track.name ]
-        , div [ class "track-sequence" ] (renderSequence playbackPosition index track.name track.sequence)
-        ]
+    [ p [ class "track-title" ] [ text track.name ]
+    , div
+        [ class "track-sequence" ]
+        (renderSequence playbackPosition index track.name track.sequence)
+    ]
 
 
 renderSequence : Int -> Int -> Clip -> Array Bool -> List (Html Msg)
